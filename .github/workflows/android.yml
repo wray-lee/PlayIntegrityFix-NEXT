@@ -20,43 +20,22 @@ jobs:
           submodules: "recursive"
           fetch-depth: 0
           
-      - name: Diagnose and Force Submodule Checkout
-        run: |
-          echo "--- 1. Checking submodule status before update ---"
-          git submodule status --recursive
-
-          echo ""
-          echo "--- 2. Synchronizing submodule URLs ---"
-          git submodule sync --recursive
-
-          echo ""
-          echo "--- 3. Forcing submodule update with verbose output ---"
-          # 使用 --force --verbose 来获取详细输出，并强制覆盖
-          git submodule update --init --recursive --force --verbose
           
-          echo ""
-          echo "--- 4. Checking submodule status AFTER update ---"
-          git submodule status --recursive
-
-          echo ""
-          echo "--- 5. Final check of the Dobby directory ---"
-          ls -la inject/src/main/cpp/
-          
-      # - name: Set up JDK 17
-      #   uses: actions/setup-java@v4
-      #   with:
-      #     java-version: '17'
-      #     distribution: 'temurin'
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
   
   
-      # - name: Grant execute permission for gradlew
-      #   run: chmod +x gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
         
-      # - name: Build with Gradle
-      #   run: ./gradlew assembleRelease
+      - name: Build with Gradle
+        run: ./gradlew assembleRelease
         
-      # - name: Upload PlayIntegrityFix.zip
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: PlayIntegrityFix
-      #     path: module/*
+      - name: Upload PlayIntegrityFix.zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: PlayIntegrityFix
+          path: module/*
