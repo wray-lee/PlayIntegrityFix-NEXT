@@ -5,35 +5,58 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Arch Linux
-      uses: uD83D/setup-arch@v1
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y unzip git
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+          fetch-depth: 0
+          
+      - name: Diagnose and Force Submodule Checkout
+        run: |
+          echo "--- 1. Checking submodule status before update ---"
+          git submodule status --recursive
 
-    - name: Install dependencies
-      run: |
-        pacman -Sy --noconfirm jdk17-openjdk unzip git
+          echo ""
+          echo "--- 2. Synchronizing submodule URLs ---"
+          git submodule sync --recursive
 
-    - name: Check out
-      uses: actions/checkout@v4
-      with:
-        submodules: "recursive"
-        fetch-depth: 0
+          echo ""
+          echo "--- 3. Forcing submodule update with verbose output ---"
+          # 使用 --force --verbose 来获取详细输出，并强制覆盖
+          git submodule update --init --recursive --force --verbose
+          
+          echo ""
+          echo "--- 4. Checking submodule status AFTER update ---"
+          git submodule status --recursive
 
-    - name: Set JAVA_HOME
-      run: echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk" >> $GITHUB_ENV
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-      
-    - name: Build with Gradle
-      run: ./gradlew assembleRelease
-      
-    - name: Upload PlayIntegrityFix.zip
-      uses: actions/upload-artifact@v4
-      with:
-        name: PlayIntegrityFix
-        path: module/*
+          echo ""
+          echo "--- 5. Final check of the Dobby directory ---"
+          ls -la inject/src/main/cpp/
+          
+      # - name: Set up JDK 17
+      #   uses: actions/setup-java@v4
+      #   with:
+      #     java-version: '17'
+      #     distribution: 'temurin'
+  
+  
+      # - name: Grant execute permission for gradlew
+      #   run: chmod +x gradlew
+        
+      # - name: Build with Gradle
+      #   run: ./gradlew assembleRelease
+        
+      # - name: Upload PlayIntegrityFix.zip
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: PlayIntegrityFix
+      #     path: module/*
