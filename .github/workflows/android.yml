@@ -5,35 +5,36 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Arch Linux
-      uses: uD83D/setup-arch@v1
-
-    - name: Install dependencies
-      run: |
-        pacman -Sy --noconfirm jdk17-openjdk unzip git
-
-    - name: Check out
-      uses: actions/checkout@v4
-      with:
-        submodules: "recursive"
-        fetch-depth: 0
-
-    - name: Set JAVA_HOME
-      run: echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk" >> $GITHUB_ENV
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-      
-    - name: Build with Gradle
-      run: ./gradlew assembleRelease
-      
-    - name: Upload PlayIntegrityFix.zip
-      uses: actions/upload-artifact@v4
-      with:
-        name: PlayIntegrityFix
-        path: module/*
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y unzip git
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+          fetch-depth: 0
+          
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+  
+  
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        
+      - name: Build with Gradle
+        run: ./gradlew assembleRelease
+        
+      - name: Upload PlayIntegrityFix.zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: PlayIntegrityFix
+          path: module/*
